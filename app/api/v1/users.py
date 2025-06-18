@@ -48,8 +48,6 @@ class UserResource(Resource):
     def get(self):
         list_all = []
         user = facade.get_all_user()
-        if not user:
-            return {'error': 'No user found'}, 404
         for element in user:
             list_all.append({
                 "id": element.id,
