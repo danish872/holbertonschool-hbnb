@@ -1,0 +1,63 @@
+from app.models.__init__ import BaseModel
+
+class Place(BaseModel):
+    def __init__(self, title, description, price, latitude, longitude, owner_id):
+        super().__init__()
+        self.title = (title)
+        self.description = description
+        self.price = (price)
+        self.latitude = (latitude)
+        self.longitude = (longitude)
+        self.owner_id = owner_id
+        self.reviews = []
+        self.amenities = []
+
+    def add_review(self, review):
+        self.reviews.append(review)
+
+    def add_amenity(self, amenity):
+        self.amenities.append(amenity)
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, title):
+        if(len(title) < 101):
+            self._title = title
+        else:
+            raise ValueError ("Title is not conforme to standar")
+
+    @property
+    def price(self):
+        return self._price
+
+    @price.setter
+    def price(self, price):
+        if(price >= 0):
+            self._price = price
+        else:
+            raise ValueError ("price must be positif")
+    
+    @property
+    def latitude(self):
+        return self._latitude
+
+    @latitude.setter
+    def latitude(self, latitude):
+        if(latitude >= -90 and latitude <= 90):
+            self._latitude = latitude
+        else:
+            raise ValueError ("latitude must be within the range of -90.0 to 90.0")
+
+    @property
+    def longitude(self):
+        return self._longitude
+
+    @longitude.setter
+    def longitude(self, longitude):
+        if(longitude >= -180 and longitude <= 180):
+            self._longitude = longitude
+        else:
+            raise ValueError ("longitude must be within the range of -180.0 to 180.0")
