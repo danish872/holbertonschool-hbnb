@@ -15,8 +15,6 @@ class Review(BaseModel):
         self.user_id = user_id
         self.rating = rating
         self.comment = comment
-        self._created_at: datetime = datetime.utcnow()
-        self._updated_at: datetime = self._created_at
 
     def _validate_str(self, value: str, field: str, max_length: int = None):
         """Validate that value is a non-empty string with an optional max length."""
