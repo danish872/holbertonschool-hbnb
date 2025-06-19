@@ -1,4 +1,4 @@
-from app.models.__init__ import BaseModel
+from .base_model import BaseModel
 import re
 
 class User(BaseModel):
@@ -17,6 +17,7 @@ class User(BaseModel):
     def email(self, email):
         if(re.fullmatch(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b', email)):
             self._email = email
+            self.save()
         else:
             raise ValueError ("Email is not conforme to standar")
     
@@ -30,6 +31,7 @@ class User(BaseModel):
             raise ValueError ("First name to long")
         else:
             self._first_name = first_name
+            self.save()
 
     @property
     def last_name(self):
@@ -41,6 +43,7 @@ class User(BaseModel):
             raise ValueError ("Last name to long")
         else:
             self._last_name = last_name
+            self.save()
 
     def __str__(self):
         return "{} {}".format(self.first_name, self.last_name)

@@ -1,4 +1,4 @@
-from app.models.__init__ import BaseModel
+from .base_model import BaseModel
 
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude, owner_id):
@@ -26,6 +26,7 @@ class Place(BaseModel):
     def title(self, title):
         if(len(title) < 101):
             self._title = title
+            self.save()
         else:
             raise ValueError ("Title is not conforme to standar")
 
@@ -37,6 +38,7 @@ class Place(BaseModel):
     def price(self, price):
         if(price >= 0):
             self._price = price
+            self.save()
         else:
             raise ValueError ("price must be positif")
     
@@ -48,6 +50,7 @@ class Place(BaseModel):
     def latitude(self, latitude):
         if(latitude >= -90 and latitude <= 90):
             self._latitude = latitude
+            self.save()
         else:
             raise ValueError ("latitude must be within the range of -90.0 to 90.0")
 
@@ -59,5 +62,6 @@ class Place(BaseModel):
     def longitude(self, longitude):
         if(longitude >= -180 and longitude <= 180):
             self._longitude = longitude
+            self.save()
         else:
             raise ValueError ("longitude must be within the range of -180.0 to 180.0")

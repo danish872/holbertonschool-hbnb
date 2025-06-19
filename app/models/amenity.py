@@ -13,5 +13,6 @@ class Amenity(BaseModel):
     def name(self, name):
         if(len(name) <= 50):
             self._name = name
+            self.save()
         else:
             raise ValueError ("name is too long")
