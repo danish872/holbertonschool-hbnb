@@ -104,7 +104,7 @@ class PlaceResource(Resource):
         if not facade.get_place(place_id):
             return {'error': 'place not found'}, 404
         if not facade.get_user(new_data["owner_id"]):
-            return {'error': 'user not found'}, 404
+            return {'error': 'user not found'}, 400
         try:
             facade.update_place(place_id=place_id, place_data=new_data)
             return {"message": "Place updated successfully"}, 200
