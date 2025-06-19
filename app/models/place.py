@@ -1,14 +1,15 @@
 from .base_model import BaseModel
+from datetime import datetime
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner_id):
+    def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
-        self.title = (title)
+        self.title = title
         self.description = description
-        self.price = (price)
-        self.latitude = (latitude)
-        self.longitude = (longitude)
-        self.owner_id = owner_id
+        self.price = price
+        self.latitude = latitude
+        self.longitude = longitude
+        self.owner = owner
         self.reviews = []
         self.amenities = []
 
@@ -17,6 +18,18 @@ class Place(BaseModel):
 
     def add_amenity(self, amenity):
         self.amenities.append(amenity)
+
+    @property
+    def owner(self):
+        return self._owner
+
+    @owner.setter
+    def owner(self, owner):
+        if (isinstance(owner, User)):
+            self._owner = owner
+            self.save()
+        else:
+            raise ValueError ("owner not found")
 
     @property
     def title(self):
