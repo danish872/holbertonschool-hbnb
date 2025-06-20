@@ -1,8 +1,9 @@
 from .base_model import BaseModel
 from datetime import datetime
+from app.models.user import User
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    def __init__(self, title, description, price, latitude, longitude, owner, amenities):
         super().__init__()
         self.title = title
         self.description = description
@@ -11,7 +12,7 @@ class Place(BaseModel):
         self.longitude = longitude
         self.owner = owner
         self.reviews = []
-        self.amenities = []
+        self.amenities = amenities
 
     def add_review(self, review):
         self.reviews.append(review)
@@ -78,3 +79,15 @@ class Place(BaseModel):
             self.save()
         else:
             raise ValueError ("longitude must be within the range of -180.0 to 180.0")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "price": self.price,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "owner": self.owner.to_dict(),
+            "amenities": [element.to_dict() for element in self.amenities]
+        }
