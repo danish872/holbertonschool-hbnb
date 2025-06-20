@@ -3,7 +3,7 @@ from datetime import datetime
 from app.models.user import User
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner, amenities):
+    def __init__(self, title, price, latitude, longitude, owner, amenities, description=""):
         super().__init__()
         self.title = title
         self.description = description
