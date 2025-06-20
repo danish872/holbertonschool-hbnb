@@ -19,7 +19,6 @@ class Review(BaseModel):
 
     @place.setter
     def place(self, place):
-        print(type(place))
         if isinstance(place, Place):
             self._place = place.id
             self.save()
