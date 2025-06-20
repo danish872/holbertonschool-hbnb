@@ -60,11 +60,11 @@ class UserChange(Resource):
     def put(self, user_id):
         """Get user details by ID"""
         new_data = api.payload
-        if facade.get_user_by_email(new_data['email']):
-            return {'error': 'Email already registered'}, 400
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
+        if facade.get_user_by_email(new_data['email']):
+            return {'error': 'Email already registered'}, 400
         try:
             new_user = facade.update_user(user_id=user_id, data=new_data)
             return user.to_dict(), 200
