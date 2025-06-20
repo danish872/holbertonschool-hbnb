@@ -1,4 +1,5 @@
 from .base_model import BaseModel
+from datetime import datetime
 
 class Amenity(BaseModel):
     def __init__(self, name):
@@ -13,5 +14,12 @@ class Amenity(BaseModel):
     def name(self, name):
         if(len(name) <= 50):
             self._name = name
+            self.save()
         else:
             raise ValueError ("name is too long")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
