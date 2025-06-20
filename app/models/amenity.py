@@ -17,3 +17,9 @@ class Amenity(BaseModel):
             self.save()
         else:
             raise ValueError ("name is too long")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
