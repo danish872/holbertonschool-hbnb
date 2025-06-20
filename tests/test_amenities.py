@@ -1,113 +1,83 @@
-import requests
-import pytest
-import uuid
+from app import create_app
+import unittest
 
-class TestAmenities:
+class TestAmenityEndpoints(unittest.TestCase):
 
+    def setUp(self):
+        self.app = create_app()
+        self.client = self.app.test_client()
+
+    #------------- all test related to creation of amenities -------------
     def test_create_amenity_success(self):
-        """Test de création d'un équipement avec succès"""
-        amenity_data = {
-            "name": f"Test Amenity {uuid.uuid4().hex[:8]}",
-            "description": "A test amenity description"
-        }
-        response = requests.post(f"{BASE_URL}/amenities/", json=amenity_data)
+        response = self.client.post('/api/v1/amenities/', json={
+            "name": "Wi-Fi"
+        })
+        self.assertEqual(response.status_code, 201)
+        amenity = response.get_json()
+        self.assertIn("id", amenity)
+        self.assertEqual(amenity["name"], "Wi-Fi")
 
-        assert response.status_code == 201, f"Response: {response.text}"
+    def test_create_amenity_empty_name(self):
+        response = self.client.post('/api/v1/amenities/', json={
+            "name": ""
+        })
+        self.assertEqual(response.status_code, 400)
 
-        amenity = response.json()
-        assert "id" in amenity
-        assert amenity["name"] == amenity_data["name"]
-        assert amenity["description"] == amenity_data["description"]
-
-    def test_create_amenity_missing_fields(self):
-        """Test de création d'un équipement avec des champs manquants"""
-        amenity_data = {
-            "name": "Incomplete Amenity"
-        
-        }
-        response = requests.post(f"{BASE_URL}/amenities/", json=amenity_data)
-
-        assert response.status_code == 400, f"Response: {response.text}"
-
-        data = response.json()
-        assert "message" in data or "error" in data
-
-    def test_create_amenity_duplicate_name(self):
-        """Test de création d'un équipement avec un nom déjà utilisé"""
-        unique_name = f"Unique Amenity {uuid.uuid4().hex[:8]}"
-
-        amenity_data1 = {
-            "name": unique_name,
-            "description": "Original description"
-        }
-        response1 = requests.post(f"{BASE_URL}/amenities/", json=amenity_data1)
-        assert response1.status_code == 201, f"Failed to create first amenity: {response1.text}"
-
-        amenity_data2 = {
-            "name": unique_name,
-            "description": "Another description"
-        }
-        response2 = requests.post(f"{BASE_URL}/amenities/", json=amenity_data2)
-
-        assert response2.status_code == 400, f"Response: {response2.text}"
-
-        data = response2.json()
-        assert "error" in data
-
+    #------------- all test related to retrieving amenities -------------
     def test_get_all_amenities(self):
-        """Test pour récupérer tous les équipements"""
-        response = requests.get(f"{BASE_URL}/amenities/")
+        response = self.client.get('/api/v1/amenities/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.get_json(), list)
 
-        assert response.status_code == 200, f"Response: {response.text}"
+    def test_get_amenity_by_id(self):
+        # Créer une amenity pour pouvoir la récupérer ensuite
+        post_response = self.client.post('/api/v1/amenities/', json={
+            "name": "Pool"
+        })
+        self.assertEqual(post_response.status_code, 201)
+        amenity = post_response.get_json()
 
-        data = response.json()
-        assert "amenities" in data
-        assert isinstance(data["amenities"], list)
+        get_response = self.client.get(f"/api/v1/amenities/{amenity['id']}")
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(get_response.get_json()["name"], "Pool")
 
-    def test_get_amenity_by_id(self, create_test_amenity):
-        """Test pour récupérer un équipement par son ID - adapté à l'implémentation existante"""
-        amenity_id = create_test_amenity["id"]
+    def test_get_amenity_invalid_id(self):
+        response = self.client.get("/api/v1/amenities/invalid-id-1234")
+        self.assertEqual(response.status_code, 404)
 
-        try:
-            response = requests.get(f"{BASE_URL}/amenities/{amenity_id}")
-            status_code = response.status_code
-        except Exception:
-            
-            pytest.skip("Endpoint GET /amenities/{id} not implemented or incorrect")
-            return
+    #------------- all test related to updating amenities -------------
+    def test_update_amenity_success(self):
+        # Create amenity
+        post_response = self.client.post('/api/v1/amenities/', json={
+            "name": "Gym"
+        })
+        amenity = post_response.get_json()
 
-        if status_code in [200, 201]:
-            amenity = response.json()
-            amenity_response_id = amenity.get("id") or amenity.get("amenity_id")
-            assert amenity_response_id == amenity_id
-            assert amenity["name"] == create_test_amenity["name"]
-            assert amenity["description"] == create_test_amenity["description"]
-        elif status_code == 404:
-            pytest.skip("Amenity not found or endpoint not implemented")
-        elif status_code == 500:
-            error_text = response.text
-            if "AttributeError: 'HBnBFacade' object has no attribute 'get_amenity_by_id'" in error_text:
-                pytest.skip("Method get_amenity_by_id not implemented in HBnBFacade")
+        # update
+        put_response = self.client.put(f"/api/v1/amenities/{amenity['id']}", json={
+            "name": "Fitness Room"
+        })
+        self.assertEqual(put_response.status_code, 200)
+        self.assertEqual(put_response.get_json()["message"], "Amenity updated successfully")
 
-    def test_update_amenity(self, create_test_amenity):
-        """Test pour mettre à jour un équipement"""
-        amenity_id = create_test_amenity["id"]
-        update_data = {
-            "name": f"Updated Amenity {uuid.uuid4().hex[:8]}",
-            "description": "Updated description"
-        }
+    def test_update_amenity_invalid_id(self):
+        response = self.client.put("/api/v1/amenities/invalid-id-1234", json={
+            "name": "Updated Amenity"
+        })
+        self.assertEqual(response.status_code, 404)
 
-        try:
-            response = requests.put(f"{BASE_URL}/amenities/{amenity_id}", json=update_data)
-            status_code = response.status_code
-        except Exception:
-            pytest.skip("Endpoint PUT /amenities/{id} failed")
-            return
+    def test_update_amenity_empty_name(self):
+        # Créer une amenity
+        post_response = self.client.post('/api/v1/amenities/', json={
+            "name": "Parking"
+        })
+        amenity = post_response.get_json()
 
-        if status_code == 200:
-            updated_amenity = response.json()
-            assert updated_amenity["id"] == amenity_id
-            assert updated_amenity["name"] == update_data["name"]
-            assert updated_amenity["description"] == update_data["description"]
-        elif status_code in [404, 500]:
-            pytest.skip("Update amenity endpoint not fully implemented")
+        # Mise à jour avec nom vide
+        put_response = self.client.put(f"/api/v1/amenities/{amenity['id']}", json={
+            "name": ""
+        })
+        self.assertEqual(put_response.status_code, 400)
+
+if __name__ == '__main__':
+    unittest.main()
