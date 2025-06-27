@@ -46,12 +46,12 @@ class AmenityResource(Resource):
     def put(self, amenity_id):
         """Update amenity by ID"""
         data = api.payload
+        if facade.get_amenity(amenity_id) == None:
+            return {'error': 'Amenity not found'}, 404
         if not data.get('name'):
             return {'error': 'Name cannot be empty'}, 400
         try:
             updated = facade.update_amenity(amenity_id, api.payload)
-            if updated:
-                return {'error': 'Amenity not found'}, 404
             return {'message': 'Amenity updated successfully'}, 200
         except ValueError as e:
             return {'error': str(e)}, 400
