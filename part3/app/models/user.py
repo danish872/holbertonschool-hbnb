@@ -66,7 +66,6 @@ class User(BaseModel):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
-            "password (a enlever)": self.password
         }
 
     def __str__(self):
