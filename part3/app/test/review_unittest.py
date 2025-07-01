@@ -8,14 +8,14 @@ class TestUserEndpoints(unittest.TestCase):
         self.client = self.app.test_client()
 
     #===============================================================
-    # ----- test all request -----
+    # ----- test all request basic work and value error -----
     #===============================================================
-    def test_post_place(self):
+    def test_post_review(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "nath",
-            "last_name": "Dup",
-            "email": "nat.dup@example.com",
-            "password": "toto1"
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         response = self.client.post('/api/v1/users/', json={
             "first_name": "nath",
@@ -62,12 +62,12 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
     #------------- all test related to the GET request for review -------------
-    def test_get_place(self):
+    def test_get_review(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "nath",
-            "last_name": "Dup",
-            "email": "nat.dup@example.com",
-            "password": "toto1"
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         response = self.client.post('/api/v1/users/', json={
             "first_name": "nath",
@@ -112,12 +112,12 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         
     #------------- all test related to the PUT request for review -------------
-    def test_put_place(self):
+    def test_put_review(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "nath",
-            "last_name": "Dup",
-            "email": "nat.dup@example.com",
-            "password": "toto1"
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         response = self.client.post('/api/v1/users/', json={
             "first_name": "nath",
@@ -167,7 +167,7 @@ class TestUserEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     #------------- all test related to the DELETE request for review -------------
-    def test_delete_place(self):
+    def test_delete_review(self):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane",
             "last_name": "Doe",
@@ -213,7 +213,7 @@ class TestUserEndpoints(unittest.TestCase):
     #===============================================================
     # ----- test JWT access for all route that use it -----
     #===============================================================
-    def test_post_review(self):
+    def test_JWT_post_review(self):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane",
             "last_name": "Doe",
@@ -267,7 +267,7 @@ class TestUserEndpoints(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 400) 
 
-    def test_put_review(self):
+    def test_JWT_put_review(self):
         # create the users the place and the review
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane",
@@ -330,7 +330,7 @@ class TestUserEndpoints(unittest.TestCase):
         
         self.assertEqual(response.status_code, 200) 
 
-    def test_delete_review(self):
+    def test_JWT_delete_review(self):
         # create the users the place and the review
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane",
