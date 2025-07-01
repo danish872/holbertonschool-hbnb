@@ -7,81 +7,102 @@ class TestUserEndpoints(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client()
 
-    #------------- all test related to the POST request for review -------------
+    #===============================================================
+    # ----- test all request -----
+    #===============================================================
     def test_post_place(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "Jane",
-            "last_name": "Doe",
-            "email": "jane.doe@example.com"
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
         })
-        user = response.get_json()
-        response = self.client.post('/api/v1/places/', json={
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "title": "Cozy Apartment",
             "description": "A nice place to stay",
             "price": 100.0,
             "latitude": 37.7749,
-            "longitude": 12.4194, 
-            "owner_id": user["id"],
+            "longitude": -122.4194,
             "amenities": []
         })
         place = response.get_json()
-        response = self.client.post('/api/v1/reviews/', json={
-            "text": "Great place to stay!",
-            "rating": 5,
-            "user_id": user["id"],
-            "place_id": place["id"]
-        })
-        self.assertEqual(response.status_code, 201)
-        response = self.client.post('/api/v1/reviews/', json={
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "text": "Great place to stay!",
             "rating": 6,
-            "user_id": user["id"],
             "place_id": place["id"]
         })
         self.assertEqual(response.status_code, 400)
-        response = self.client.post('/api/v1/reviews/', json={
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "text": "Great place to stay!",
             "rating": 5,
-            "user_id": "toto",
-            "place_id": place["id"]
-        })
-        self.assertEqual(response.status_code, 400)
-        response = self.client.post('/api/v1/reviews/', json={
-            "text": "Great place to stay!",
-            "rating": 5,
-            "user_id": user["id"],
             "place_id": "totohouse"
         })
         self.assertEqual(response.status_code, 400)
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        self.assertEqual(response.status_code, 201)
 
     #------------- all test related to the GET request for review -------------
     def test_get_place(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "Jane1",
-            "last_name": "Doe1",
-            "email": "jane1.doe@example.com"
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
         })
-        user = response.get_json()
-        response = self.client.post('/api/v1/places/', json={
-            "title": "Cozy Apartment1",
-            "description": "A nice place to stay1",
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
             "price": 100.0,
             "latitude": 37.7749,
-            "longitude": 12.4194, 
-            "owner_id": user["id"],
+            "longitude": -122.4194,
             "amenities": []
         })
         place = response.get_json()
-        response = self.client.post('/api/v1/reviews/', json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "text": "Great place to stay!",
             "rating": 5,
-            "user_id": user["id"],
             "place_id": place["id"]
         })
-        review = response.get_json()
+        review = response.get_json()["id"]
         response = self.client.get('/api/v1/reviews/')
         self.assertEqual(response.status_code, 200)
-        response = self.client.get('/api/v1/reviews/{}'.format(review["id"]))
+        response = self.client.get('/api/v1/reviews/{}'.format(review))
         self.assertEqual(response.status_code, 200)
         response = self.client.get('/api/v1/reviews/toto')
         self.assertEqual(response.status_code, 404)
@@ -90,71 +111,281 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.get('/api/v1/reviews/places/{}/reviews'.format(place["id"]))
         self.assertEqual(response.status_code, 200)
         
-    #------------- all test related to the GET request for review -------------
+    #------------- all test related to the PUT request for review -------------
     def test_put_place(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "Jane2",
-            "last_name": "Doe2",
-            "email": "jane.doe2@example.com"
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
         })
-        user = response.get_json()
-        response = self.client.post('/api/v1/places/', json={
-            "title": "Cozy Apartment2",
-            "description": "A nice place to stay2",
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
             "price": 100.0,
             "latitude": 37.7749,
-            "longitude": 12.4194, 
-            "owner_id": user["id"],
+            "longitude": -122.4194,
             "amenities": []
         })
         place = response.get_json()
-        response = self.client.post('/api/v1/reviews/', json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
             "text": "Great place to stay!",
             "rating": 5,
-            "user_id": user["id"],
             "place_id": place["id"]
         })
         review = response.get_json()
-        response = self.client.put('/api/v1/reviews/hihi', json={
+        response = self.client.put('/api/v1/reviews/toto', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+        })
+        self.assertEqual(response.status_code, 404)
+        response = self.client.put('/api/v1/reviews/{}'.format(review["id"]), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "ugly",
+            "rating": -45
+        })
+        self.assertEqual(response.status_code, 400)
+        response = self.client.put('/api/v1/reviews/{}'.format(review["id"]), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "title": "ugly",
             "rating": 1
         })
-        self.assertEqual(response.status_code, 404)
-        response = self.client.put('/api/v1/reviews/{}'.format(review["id"]), json={
-            "title": "ugly",
-            "rating": 45
-        })
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
 
     #------------- all test related to the DELETE request for review -------------
     def test_delete_place(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "Jane3",
-            "last_name": "Doe3",
-            "email": "jane.doe3@example.com"
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
-        user = response.get_json()
-        response = self.client.post('/api/v1/places/', json={
-            "title": "Cozy Apartment2",
-            "description": "A nice place to stay2",
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
             "price": 100.0,
             "latitude": 37.7749,
-            "longitude": 12.4194, 
-            "owner_id": user["id"],
+            "longitude": -122.4194,
             "amenities": []
         })
         place = response.get_json()
-        response = self.client.post('/api/v1/reviews/', json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
             "text": "Great place to stay!",
             "rating": 5,
-            "user_id": user["id"],
             "place_id": place["id"]
         })
         review = response.get_json()
-        response = self.client.delete('/api/v1/reviews/hihi')
+        response = self.client.delete('/api/v1/reviews/hihi', headers={'Authorization': 'Bearer {}'.format(current_tok)})
         self.assertEqual(response.status_code, 404)
-        response = self.client.delete('/api/v1/reviews/{}'.format(review["id"]))
+        response = self.client.delete('/api/v1/reviews/{}'.format(review["id"]), headers={'Authorization': 'Bearer {}'.format(current_tok)})
         self.assertEqual(response.status_code, 200)
+
+    #===============================================================
+    # ----- test JWT access for all route that use it -----
+    #===============================================================
+    def test_post_review(self):
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "price": 100.0,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "amenities": []
+        })
+        place = response.get_json()
+        # try to review the place as the creator of it
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        self.assertEqual(response.status_code, 400)
+        # try to review the place as a normal user for the first time
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        self.assertEqual(response.status_code, 201)
+        # try to review a second time the same place
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        self.assertEqual(response.status_code, 400) 
+
+    def test_put_review(self):
+        # create the users the place and the review
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "price": 100.0,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "amenities": []
+        })
+        place = response.get_json()
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        review_test = response.get_json()
+        # try to modify the review as another user
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/reviews/{}'.format(review_test['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "worst place to stay!",
+            "rating": 1
+        })
+        self.assertEqual(response.status_code, 403)
+        # try to modify the review as the writer
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/reviews/{}'.format(review_test['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "worst place to stay!",
+            "rating": 1
+        })
+        
+        self.assertEqual(response.status_code, 200) 
+
+    def test_delete_review(self):
+        # create the users the place and the review
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "nath",
+            "last_name": "Dup",
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/places/', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "title": "Cozy Apartment",
+            "description": "A nice place to stay",
+            "price": 100.0,
+            "latitude": 37.7749,
+            "longitude": -122.4194,
+            "amenities": []
+        })
+        place = response.get_json()
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.post('/api/v1/reviews/', headers={'Authorization': 'Bearer {}'.format(current_tok)},json={
+            "text": "Great place to stay!",
+            "rating": 5,
+            "place_id": place["id"]
+        })
+        review_test = response.get_json()
+        # try to delete the review as another user
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.delete('/api/v1/reviews/{}'.format(review_test['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)})
+        self.assertEqual(response.status_code, 403)
+        # try to delete the review as the writer
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "nat.dup@example.com",
+            "password": "toto1"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.delete('/api/v1/reviews/{}'.format(review_test['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)})
+        
+        self.assertEqual(response.status_code, 200) 
 
 if __name__ == '__main__':
     unittest.main()
