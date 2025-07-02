@@ -18,9 +18,13 @@ class UserList(Resource):
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
+    #@jwt_required()
     def post(self):
         """Register a new user"""
+        current_user = get_jwt_identity()
         user_data = api.payload
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
         # Simulate email uniqueness check (to be replaced by real validation with persistence)
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
@@ -64,12 +68,16 @@ class UserChange(Resource):
         new_data = api.payload
         user = facade.get_user(user_id)
         current_user = get_jwt_identity()
+        if not (current_user.get("is_admin")):
+            return {'error': 'Admin privileges required'}, 403
         if not user:
             return {'error': 'User not found'}, 404
         elif user_id != current_user["id"]:
             return {'error': 'Unauthorized action.'}, 403
-        elif ("password" in new_data) or ("email" in new_data):
-            return {'error': 'You cannot modify email or password.'}, 400
+        if new_data.get('email'):
+            existing_user = facade.get_user_by_email(new_data['email'])
+            if existing_user and existing_user.id != user_id:
+                return {'error': 'Email already in use'}, 400
         try:
             facade.update_user(user_id=user_id, data=new_data)
             return user.to_dict(), 200
