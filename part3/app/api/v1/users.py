@@ -2,7 +2,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
-api = Namespace('users', description='User operations')
+api = Namespace('admin', description='Admin operations')
 
 # Define the user model for input validation and documentation
 user_model = api.model('User', {
@@ -13,7 +13,7 @@ user_model = api.model('User', {
 })
 
 @api.route('/')
-class UserList(Resource):
+class AdminUserCreate(Resource):
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
@@ -21,10 +21,10 @@ class UserList(Resource):
     #@jwt_required()
     def post(self):
         """Register a new user"""
-        current_user = get_jwt_identity()
+        #current_user = get_jwt_identity()
         user_data = api.payload
-        if not current_user.get('is_admin'):
-            return {'error': 'Admin privileges required'}, 403
+        #if not current_user.get('is_admin'):
+        #   return {'error': 'Admin privileges required'}, 403
         # Simulate email uniqueness check (to be replaced by real validation with persistence)
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
@@ -34,7 +34,16 @@ class UserList(Resource):
             return new_user.to_dict(), 201
         except ValueError as e:
             return  {'error': str(e)}, 400
-
+        
+    @api.response(200, 'User details retrieved successfully')
+    @api.response(404, 'No user found')
+    def get(self):
+        list_all = []
+        user = facade.get_all_user()
+        for element in user:
+            list_all.append(element.to_dict())
+        return list_all, 200
+    
 @api.route('/<user_id>')
 class UserResource(Resource):
     @api.response(200, 'User details retrieved successfully')
@@ -45,20 +54,7 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         return user.to_dict(), 200
-
-@api.route('/')
-class UserResource(Resource):
-    @api.response(200, 'User details retrieved successfully')
-    @api.response(404, 'No user found')
-    def get(self):
-        list_all = []
-        user = facade.get_all_user()
-        for element in user:
-            list_all.append(element.to_dict())
-        return list_all, 200
-
-@api.route('/<user_id>')
-class UserChange(Resource):
+    
     @api.response(200, 'User details change successfully')
     @api.response(400, 'Invalid input data')
     @api.response(404, 'User not found')
@@ -68,11 +64,10 @@ class UserChange(Resource):
         new_data = api.payload
         user = facade.get_user(user_id)
         current_user = get_jwt_identity()
-        if not (current_user.get("is_admin")):
-            return {'error': 'Admin privileges required'}, 403
+        is_admin = current_user.get('is_admin', False)
         if not user:
             return {'error': 'User not found'}, 404
-        elif user_id != current_user["id"]:
+        elif not is_admin and user_id != current_user["id"]:
             return {'error': 'Unauthorized action.'}, 403
         if new_data.get('email'):
             existing_user = facade.get_user_by_email(new_data['email'])
