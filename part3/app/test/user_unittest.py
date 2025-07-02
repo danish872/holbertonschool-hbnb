@@ -7,12 +7,15 @@ class TestUserEndpoints(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client()
 
-    #------------- all test related at the creation of the user -------------
+    #===============================================================
+    # ----- test all request basic work and value error -----
+    #===============================================================
     def test_create_user(self):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane",
             "last_name": "Doe",
-            "email": "jane.doe@example.com"
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         self.assertEqual(response.status_code, 201)
 
@@ -20,7 +23,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "",
             "last_name": "",
-            "email": "invalid-email"
+            "email": "invalid-email",
+            "password": "toto"
         })
         self.assertEqual(response.status_code, 400)
 
@@ -30,7 +34,8 @@ class TestUserEndpoints(unittest.TestCase):
             ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddd""",
             "last_name": "Doe",
-            "email": "jane.doe@example.com"
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         self.assertEqual(response.status_code, 400)
 
@@ -40,7 +45,8 @@ class TestUserEndpoints(unittest.TestCase):
             "last_name": """dddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddd""",
-            "email": "jane.doe@example.com"
+            "email": "jane.doe@example.com",
+            "password": "toto"
         })
         self.assertEqual(response.status_code, 400)
 
@@ -49,7 +55,8 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane1",
             "last_name": "Doe1",
-            "email": "jane1.doe@example.com"
+            "email": "jane1.doe@example.com",
+            "password": "toto"
         })
         user = response.get_json()
         response = self.client.get('/api/v1/users/{}'.format(user["id"]))
@@ -67,29 +74,38 @@ class TestUserEndpoints(unittest.TestCase):
     #------------- all test related to modify user data -------------
     def test_update_user(self):
         response = self.client.post('/api/v1/users/', json={
-            "first_name": "Jane2",
-            "last_name": "Doe2",
-            "email": "jane2.doe@example.com"
+            "first_name": "Jane7",
+            "last_name": "Doe7",
+            "email": "jane7.doe@example.com",
+            "password": "toto"
         })
         user = response.get_json()
-        response = self.client.put('/api/v1/users/{}'.format(user['id']), json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane7.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "first_name": "tata",
             "last_name": "Mia",
-            "email": "tata.Mia@example.com"
         })
         self.assertEqual(response.status_code, 200)
 
-    def test_update_user_invalid_email(self):
+    def test_update_user_empty_first_name(self):
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "",
+            "last_name": "Doe3",
+            "email": "jane3.doe@example.com",
+            "password": "toto"
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_user_empty_last_name(self):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane3",
-            "last_name": "Doe3",
-            "email": "jane3.doe@example.com"
-        })
-        user = response.get_json()
-        response = self.client.put('/api/v1/users/{}'.format(user['id']), json={
-            "first_name": "",
             "last_name": "",
-            "email": "invalid-email"
+            "email": "jane3.doe@example.com",
+            "password": "toto"
         })
         self.assertEqual(response.status_code, 400)
 
@@ -97,15 +113,20 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane4",
             "last_name": "Doe4",
-            "email": "jane4.doe@example.com"
+            "email": "jane4.doe@example.com",
+            "password": "toto"
         })
         user = response.get_json()
-        response = self.client.put('/api/v1/users/{}'.format(user['id']), json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane4.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "first_name": """dddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddd""",
             "last_name": "Doe",
-            "email": "jane.doe@example.com"
         })
         self.assertEqual(response.status_code, 400)
 
@@ -113,25 +134,86 @@ class TestUserEndpoints(unittest.TestCase):
         response = self.client.post('/api/v1/users/', json={
             "first_name": "Jane5",
             "last_name": "Doe5",
-            "email": "jane5.doe@example.com"
+            "email": "jane5.doe@example.com",
+            "password": "toto"
         })
         user = response.get_json()
-        response = self.client.put('/api/v1/users/{}'.format(user['id']), json={
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane5.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
             "first_name": "Jane",
             "last_name": """dddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
             ddddddddddddddddddddddddddd""",
-            "email": "jane.doe@example.com"
         })
         self.assertEqual(response.status_code, 400)
 
     def test_update_wrong_user(self):
-        response = self.client.put('/api/v1/users/1234abec', json={
-            "first_name": "Jane6",
-            "last_name": "Doe6",
-            "email": "jane6.doe@example.com"
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane8",
+            "last_name": "Doe8",
+            "email": "jane8.doe@example.com",
+            "password": "toto"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane8.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/1234abec', headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "first_name": "Jane8.1",
+            "last_name": "Doe8.1",
         })
         self.assertEqual(response.status_code, 404)
+
+    #===============================================================
+    # ----- test JWT access for all route that use it -----
+    #===============================================================
+
+    def test_JWT_put_user(self):
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane9",
+            "last_name": "Doe9",
+            "email": "jane9.doe@example.com",
+            "password": "toto"
+        })
+        user = response.get_json()
+        response = self.client.post('/api/v1/users/', json={
+            "first_name": "Jane10",
+            "last_name": "Doe10",
+            "email": "jane10.doe@example.com",
+            "password": "toto"
+        })
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane10.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "first_name": "Jane9.1",
+            "last_name": "Doe9.1"
+        })
+        self.assertEqual(response.status_code, 403)
+        response = self.client.post('/api/v1/auth/login', json={
+            "email": "jane9.doe@example.com",
+            "password": "toto"
+        })
+        current_tok = response.get_json()["access_token"]
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "first_name": "Jane9.1",
+            "last_name": "Doe9.1",
+            "email": "toto@changement.com"
+        })
+        self.assertEqual(response.status_code, 400)
+        response = self.client.put('/api/v1/users/{}'.format(user['id']), headers={'Authorization': 'Bearer {}'.format(current_tok)}, json={
+            "first_name": "Jane9.1",
+            "last_name": "Doe9.1",
+            "password": "saucetomate"
+        })
+        self.assertEqual(response.status_code, 400)
 
 if __name__ == '__main__':
     unittest.main()

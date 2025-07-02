@@ -20,7 +20,7 @@ class Review(BaseModel):
     @place.setter
     def place(self, place):
         if isinstance(place, Place):
-            self._place = place.id
+            self._place = place
             self.save()
         else:
             raise ValueError ("Place do not exist")
@@ -32,7 +32,7 @@ class Review(BaseModel):
     @user.setter
     def user(self, user):
         if isinstance(user, User):
-            self._user = user.id
+            self._user = user
             self.save()
         else:
             raise ValueError ("User do not exist")
@@ -64,8 +64,8 @@ class Review(BaseModel):
     def to_dict(self):
         return {
             'id': self.id,
-            'place': self.place,
-            'user': self.user,
+            'place': self.place.id,
+            'user': self.user.id,
             'rating': self.rating,
             'text': self.text
         }
