@@ -42,8 +42,10 @@ class User(BaseModel):
 
     @first_name.setter
     def first_name(self, first_name):
-        if(len(first_name) > 50):
+        if (len(first_name) > 50):
             raise ValueError ("First name to long")
+        elif (first_name == ""):
+            raise ValueError ("First name mustn't be empty")
         else:
             self._first_name = first_name
             self.save()
@@ -56,6 +58,8 @@ class User(BaseModel):
     def last_name(self, last_name):
         if(len(last_name) > 50):
             raise ValueError ("Last name to long")
+        elif (last_name == ""):
+            raise ValueError ("Last name mustn't be empty")
         else:
             self._last_name = last_name
             self.save()
