@@ -71,7 +71,7 @@ class UserChange(Resource):
         elif ("password" in new_data) or ("email" in new_data):
             return {'error': 'You cannot modify email or password.'}, 400
         try:
-            new_user = facade.update_user(user_id=user_id, data=new_data)
+            facade.update_user(user_id=user_id, data=new_data)
             return user.to_dict(), 200
         except ValueError as e:
             return  {'error': str(e)}, 400
