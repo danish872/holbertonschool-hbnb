@@ -1,25 +1,15 @@
-from .base_model import BaseModel
-from datetime import datetime
+from app import db
+from models.base_model import BaseModel
 
-class Amenity(BaseModel):
-    def __init__(self, name):
-        super().__init__()
-        self.name = name
+class Amenity(BaseModel, db.Model):
+    __tablename__ = 'amenity'
 
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        if(len(name) <= 50):
-            self._name = name
-            self.save()
-        else:
-            raise ValueError ("name is too long")
+    name = db.Column(db.String(255), nullable=False, unique=True)
 
     def to_dict(self):
         return {
             "id": self.id,
-            "name": self.name
+            "name": self.name,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }

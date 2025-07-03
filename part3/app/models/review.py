@@ -1,71 +1,25 @@
-#!/usr/bin/python3
-from datetime import datetime
-from app.models.base_model import BaseModel
-from app.models.user import User
-from app.models.place import Place
+from app import db
+from models.base_model import BaseModel
 
-class Review(BaseModel):
-    def __init__(self, place, user, rating, text):
-        """Initialize a new Review instance."""
-        super().__init__()
-        self.place = place
-        self.user = user
-        self.rating = rating
-        self.text = text
+class Review(BaseModel, db.Model):
+    __tablename__ = 'review'
 
-    @property
-    def place(self):
-        return self._place
+    text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    place_id = db.Column(db.String(36), db.ForeignKey('place.id'), nullable=False)
 
-    @place.setter
-    def place(self, place):
-        if isinstance(place, Place):
-            self._place = place
-            self.save()
-        else:
-            raise ValueError ("Place do not exist")
-
-    @property
-    def user(self):
-        return self._user
-
-    @user.setter
-    def user(self, user):
-        if isinstance(user, User):
-            self._user = user
-            self.save()
-        else:
-            raise ValueError ("User do not exist")
-
-    @property
-    def rating(self):
-        return self._rating
-
-    @rating.setter
-    def rating(self, rating):
-        if (rating > 0 and rating < 6):       
-            self._rating = rating
-            self.save()
-        else:
-            raise ValueError ("rating must be between 1 and 5")
-
-    @property
-    def text(self):
-        return self._text
-
-    @text.setter
-    def text(self, text):
-        if (len(text) > 0):       
-            self._text = text
-            self.save()
-        else:
-            raise ValueError ("the text must not be empty")
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'place_id', name='uq_user_place_review'),
+    )
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'place': self.place.id,
-            'user': self.user.id,
-            'rating': self.rating,
-            'text': self.text
+            "id": self.id,
+            "text": self.text,
+            "rating": self.rating,
+            "user_id": self.user_id,
+            "place_id": self.place_id,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }
