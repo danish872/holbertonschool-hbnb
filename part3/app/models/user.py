@@ -1,5 +1,5 @@
 from .base_model import BaseModel
-import app
+from app import bcrypt
 import re
 
 class User(BaseModel):
@@ -18,11 +18,11 @@ class User(BaseModel):
     @password.setter
     def password(self, password):
         """Hashes the password before storing it."""
-        self._password = app.bcrypt.generate_password_hash(password).decode('utf-8')
+        self._password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
-        return app.bcrypt.check_password_hash(self.password, password)
+        return bcrypt.check_password_hash(self.password, password)
 
     @property
     def email(self):
