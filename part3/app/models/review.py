@@ -1,17 +1,17 @@
-#!/usr/bin/python3
-from datetime import datetime
-from app.models.base_model import BaseModel
-from app.models.user import User
-from app.models.place import Place
+from app import db
+from models.base_model import BaseModel
 
-class Review(BaseModel):
-    def __init__(self, place, user, rating, text):
-        """Initialize a new Review instance."""
-        super().__init__()
-        self.place = place
-        self.user = user
-        self.rating = rating
-        self.text = text
+class Review(BaseModel, db.Model):
+    __tablename__ = 'review'
+
+    text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    place_id = db.Column(db.String(36), db.ForeignKey('place.id'), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'place_id', name='uq_user_place_review'),
+    )
 
     @property
     def place(self):
