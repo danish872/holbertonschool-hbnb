@@ -1,15 +1,19 @@
-from .base_model import BaseModel
-from app import bcrypt
+from app import db, bcrypt
+from sqlalchemy.orm import relationship
+from models.base_model import BaseModel
 import re
 
-class User(BaseModel):
-    def __init__(self, first_name, last_name, email, password, is_admin=False):
-        super().__init__()
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.is_admin = is_admin
-        self.password = password
+class User(BaseModel, db.Model):
+    __tablename__ = 'user'
+
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    places = relationship('Place', backref='owner', lazy=True)
+    reviews = relationship('Review', backref='author', lazy=True)
 
     @property
     def password(self):

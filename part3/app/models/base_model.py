@@ -1,12 +1,13 @@
 import uuid
-from datetime import datetime
-from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from app import db
 
-class BaseModel(ABC):
-    def __init__(self):
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+class BaseModel(db.model):
+    __abstract__ = True
+  
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     def save(self):
         """Update the updated_at timestamp whenever the object is modified"""

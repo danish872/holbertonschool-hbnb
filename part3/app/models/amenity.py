@@ -1,10 +1,10 @@
-from .base_model import BaseModel
-from datetime import datetime
+from app import db
+from models.base_model import BaseModel
 
-class Amenity(BaseModel):
-    def __init__(self, name):
-        super().__init__()
-        self.name = name
+class Amenity(BaseModel, db.Model):
+    __tablename__ = 'amenities'
+
+    name = db.Column(db.String(255), nullable=False, unique=True)
 
     @property
     def name(self):
