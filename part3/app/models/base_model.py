@@ -1,13 +1,14 @@
-import uuid
-from datetime import datetime, timezone
 from app import db
+import uuid
+from datetime import datetime
+from abc import abstractmethod
 
-class BaseModel(db.model):
-    __abstract__ = True
-  
+class BaseModel(db.Model):
+    __abstract__ = True  # This ensures SQLAlchemy does not create a table for BaseModel
+
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     def save(self):
         """Update the updated_at timestamp whenever the object is modified"""
