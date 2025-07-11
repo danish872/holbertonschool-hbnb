@@ -1,22 +1,18 @@
+from app.models.base_model import BaseModel
 from app import db
-from models.base_model import BaseModel
+from sqlalchemy.orm import validates 
 
-class Amenity(BaseModel, db.Model):
+class Amenity(BaseModel):
     __tablename__ = 'amenities'
 
-    name = db.Column(db.String(255), nullable=False, unique=True)
+    name = db.Column(db.String(50), nullable=False)
 
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
+    @validates("name")
+    def validate_name(self, key, name):
         if(len(name) <= 50):
-            self._name = name
             self.save()
-        else:
-            raise ValueError ("name is too long")
+            return name
+        raise ValueError ("name is too long")
 
     def to_dict(self):
         return {
