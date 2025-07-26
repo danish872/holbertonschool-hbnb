@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Places</title>
+    <link rel="icon" type="image/x-icon" href="/image/favicon.ico">
+    <link rel="stylesheet" href="css/styles_index.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <img src="./image/logo.png" class="logo">
+        <nav id="top_nav_bar">
+            <button class="button" id="index-button" onclick="goIndex()">Index</button>
+            <button class="button" id="login-button" onclick="goLogin()">Login</button>
+            <button class="button" id="logout-button" onclick="logOut()">Logout</button>
+            <p id="connected"></p>
+        </nav>
+    </header>
+    <main>
+        <section id="filter">
+            <label for="price-filter">Max Price :</label>
+            <select id="price-filter">
+                <option>50</option>
+                <option>100</option>
+                <option>200</option>
+                <option selected>All</option>
+            </select>
+        </section>
+        <section id="places-list">
+            <!-- List of places will be populated dynamically -->
+        </section>
+        
+    </main>
+    <footer>
+        2025 HBnB Evolution. all rights reserved.
+    </footer>
+    <script src="js/scripts_index.js"></script>
+</body>
+</html>
