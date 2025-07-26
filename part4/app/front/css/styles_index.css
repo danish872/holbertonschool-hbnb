@@ -1,0 +1,94 @@
+/* 
+  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
+  You'll probably need to override some of theese styles.
+*/
+
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --button-color:#ffd30f;
+  --button-color-hover:#c29f04;
+  --font-family-place-title: 'Roboto', sans-serif;
+  --font-family: 'Roboto', sans-serif;
+}
+
+
+#filter {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    text-align: center;
+    background-color:rgb(193, 225, 255);
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+#places-list{
+    display: flex;
+    flex-direction: row;
+}
+
+.place-card-title {
+    width: 100%;
+    height: 3rem;
+    align-content: center;
+    text-align: center;
+    margin: 3px;
+    font-family: var(--font-family-place-title);
+}
+
+.place-card-price {
+    align-content: center;
+    text-align: center;
+    width: 100%;
+    height: 2rem;
+    margin: 5px;
+}
+
+.place-card, .review-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    color: #333;
+    height: 10rem;
+    width: 16rem;
+    background-color: white;
+}
+
+.details-button {
+    width: 7rem;
+    height: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: var(--button-color);
+    margin: 3px;
+    font-family: var(--font-family);
+}
+
+    
+#index-button, #login-button, #logout-button {
+    height: 1.75rem;
+    width: 4rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 0.5rem;
+}
+
+.button {
+    background-color: var(--button-color);
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: var(--button-color-hover);
+    transform: translateY(-3px);
+    box-shadow: 1px 1px 1px 1px #333;
+}
+
+.place-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 1px 1px 1px 1px #333;
+}
