@@ -2,6 +2,7 @@ from app import db, bcrypt
 from sqlalchemy.orm import relationship, validates
 from app.models.base_model import BaseModel
 import re
+from sqlalchemy import inspect
 
 class User(BaseModel):
     __tablename__ = 'user'
@@ -57,15 +58,17 @@ class User(BaseModel):
         }
 
 def create_first_admin():
-    admin_email = "admin@root.com"
-    existing_admin = User.query.filter_by(email=admin_email).first()
-    if not existing_admin:
-        admin = User(
-            first_name="Admin",
-            last_name="root",
-            email=admin_email,
-            is_admin=True
-        )
-        admin.hash_password("jsp1234")
-        db.session.add(admin)
-        db.session.commit()
+    inspector = inspect(db.engine)
+    if inspector.has_table("user"):
+        admin_email = "admin@root.com"
+        existing_admin = User.query.filter_by(email=admin_email).first()
+        if not existing_admin:
+            admin = User(
+                first_name="Admin",
+                last_name="root",
+                email=admin_email,
+                is_admin=True
+            )
+            admin.hash_password("jsp1234")
+            db.session.add(admin)
+            db.session.commit()
