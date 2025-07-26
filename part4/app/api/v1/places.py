@@ -63,6 +63,7 @@ class PlaceList(Resource):
             list_all.append({
                 "id": element.id,
                 "title": element.title,
+                "price": element.price,
                 "latitude": element.latitude,
                 "longitude": element.longitude,
                 })
