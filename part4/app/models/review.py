@@ -16,7 +16,7 @@ class Review(BaseModel):
 
     @validates("rating")
     def validate_rating(self, key, rating):
-        if (rating > 0 and rating < 6):
+        if (int(rating) > 0 and int(rating) < 6):
             return rating
         else:
             raise ValueError ("rating must be between 1 and 5")
