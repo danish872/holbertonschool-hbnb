@@ -26,7 +26,6 @@ class Repository(ABC):
     def get_by_attribute(self, attr_name, attr_value):
         pass
 
-
 class InMemoryRepository(Repository):
     def __init__(self):
         self._storage = {}
@@ -50,7 +49,7 @@ class InMemoryRepository(Repository):
             del self._storage[obj_id]
 
     def get_by_attribute(self, attr_name, attr_value):
-        return next((obj for obj in self._storage.values() if getattr(obj, attr_name) == attr_value), None)
+        return next((obj for obj in self._storage.values() if getattr(obj, attr_name, None) == attr_value), None)
 
 
 class SQLAlchemyRepository(Repository):
@@ -62,6 +61,7 @@ class SQLAlchemyRepository(Repository):
         db.session.commit()
 
     def get(self, obj_id):
+        obj_id = str(obj_id)
         return self.model.query.get(obj_id)
 
     def get_all(self):
@@ -82,3 +82,4 @@ class SQLAlchemyRepository(Repository):
 
     def get_by_attribute(self, attr_name, attr_value):
         return self.model.query.filter_by(**{attr_name: attr_value}).first()
+
