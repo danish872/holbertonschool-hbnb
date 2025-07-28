@@ -3,36 +3,37 @@ from app.models.base_model import BaseModel
 from sqlalchemy.orm import validates
 
 class Review(BaseModel):
-    __tablename__ = 'review'
+    __tablename__ = 'reviews'
 
     text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
-    place_id = db.Column(db.String(36), db.ForeignKey('place.id'), nullable=False)
+    place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'place_id', name='uq_user_place_review'),
-    )
+            db.UniqueConstraint('user_id', 'place_id', name='uq_user_place_review'),
+            )
 
     @validates("rating")
     def validate_rating(self, key, rating):
-        if (int(rating) > 0 and int(rating) < 6):
+        if 1 <= int(rating) <= 5:
             return rating
-        else:
-            raise ValueError ("rating must be between 1 and 5")
+        raise ValueError("Rating must be between 1 and 5.")
 
     @validates("text")
     def validate_text(self, key, text):
-        if (len(text) > 0 and text != ""):       
+        if text and text.strip():
             return text
-        else:
-            raise ValueError ("the text must not be empty")
+        raise ValueError("Review text must not be empty.")
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'place': self.place_id,
-            'user': self.user_id,
-            'rating': self.rating,
-            'text': self.text
-        }
+                "id": self.id,
+                "text": self.text,
+                "rating": self.rating,
+                "place_id": self.place_id,
+                "user_id": self.user_id,
+                "created_at": self.created_at.isoformat(),
+                "updated_at": self.updated_at.isoformat()
+                }
+

@@ -1,21 +1,24 @@
-from app import db
 import uuid
 from datetime import datetime
-from abc import abstractmethod
+from app import db
+from abc import ABC, abstractmethod
 
-class BaseModel(db.Model):
-    __abstract__ = True  # This ensures SQLAlchemy does not create a table for BaseModel
+
+class BaseModel(db.Model, ABC):
+    __abstract__ = True  # Ne crée pas de table pour ce modèle
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def save(self):
-        """Update the updated_at timestamp whenever the object is modified"""
-        self.updated_at = datetime.now()
+        """Met à jour la date de modification et enregistre l'objet en base de données"""
+        self.updated_at = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     def update(self, data):
-        """Update the attributes of the object based on the provided dictionary"""
+        """Met à jour les attributs de l'objet à partir d'un dictionnaire"""
         for key, value in data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -23,4 +26,6 @@ class BaseModel(db.Model):
 
     @abstractmethod
     def to_dict(self):
+        """Méthode abstraite à implémenter dans les sous-classes pour convertir l'objet en dictionnaire"""
         pass
+

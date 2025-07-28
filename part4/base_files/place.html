@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Beautiful Beach House</title>
+		<link rel="stylesheet" href="css/place.css" />
+	</head>
+	<body>
+		<header>
+			<a href="index.html" id="index-link">
+				<img src="images/logo.png" alt="Application Logo" class="logo">
+			</a>
+			<nav>
+				<div class="nav-actions">
+					<a href="login.html" class="login-button" id="login-link">Login</a>
+				</div>
+			</nav>
+		</header>
+
+		<div class="container">
+			<h1 id="title">Beautiful Beach House</h1>
+
+			<div class="card" id="place-info">
+				<!-- Contenu injecté dynamiquement -->
+			</div>
+
+			<h2>Reviews</h2>
+
+			<div class="card review" data-review="1">
+				<p><strong>Jane Smith:</strong><br>Great place to stay!</p>
+				<p>Rating: <span class="stars" data-score="4"></span></p>
+			</div>
+
+			<div class="card review" data-review="2">
+				<p><strong>Robert Brown:</strong><br>Amazing location and very comfortable.</p>
+				<p>Rating: <span class="stars" data-score="5"></span></p>
+			</div>
+		</div>
+
+		<footer>
+			© 2024 HBnB Evolution. All rights reserved.
+		</footer>
+
+		<script src="script.js"></script>
+	</body>
+</html>
